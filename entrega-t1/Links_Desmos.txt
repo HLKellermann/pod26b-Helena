@@ -1,0 +1,11 @@
+#Links dos gráficos no Desmos
+
+##Algoritmos Simples:
+0-Ordem Crescente: https://www.desmos.com/calculator/kmerdj240u
+1-Ordem Aleatória: https://www.desmos.com/calculator/pkndvuxfbc
+2-Ordem Decrescente: https://www.desmos.com/calculator/ffpo7tq9np
+
+##Algoritmos Eficientes:
+0-Ordem Crescente: https://www.desmos.com/calculator/915vhqzwev
+1-Ordem Aleatória: https://www.desmos.com/calculator/psl8l6pa4o
+2-Ordem Decrescente: https://www.desmos.com/calculator/y1imdvtxfd
