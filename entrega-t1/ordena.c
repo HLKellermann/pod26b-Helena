@@ -503,52 +503,75 @@ typedef struct {
 void executa_algoritmo(algo_t *algo, int n, ordem_t ordem)
 {
   if (algo->cancelado) return;
+
   dado_t *v = malloc((size_t)n * sizeof(dado_t));         //vetor original, nao sera ordenado
-  dado_t *v_copia = malloc((size_t)n * sizeof(dado_t));   //vetor q sera ordenado, a cada repeticao o o original sera copiado para ca
+  dado_t *v_copia = malloc((size_t)n * sizeof(dado_t));   //vetor q sera ordenado, a cada repeticao o original sera copiado para ca
+
   if (v == NULL || v_copia == NULL) {
-    free(v);        //libera memoria caso um dos vetores seja nulo
+    //libera memoria caso erro na alocacao, para de tentar ordenar esse vetor
+    free(v);
     free(v_copia);
     algo->cancelado = true;
     return;
   }
   preenche_vetor(n, v, ordem);
 
-  //guarda os dois menores tempos para ver qual eh o menor depois
+  //guarda os dois menores tempos
   double menor_t = 0.0;
   double seg_menor_t = 0.0;
+  //guarda o num de comparacoes e copias do menor tempo
   long menor_compara = 0;
   long menor_copia = 0;
-  int num_repeticoes = 0; //serve pra ver se eh a 1 vez que eh ordenado ou se ja esta sendo repetido
+  //conta quantas vezes foi ordenado o vetor
+  int num_repeticoes = 0;
 
   //repete enquanto a diferenca entre o tempo das medicoes for maior que 1%
   while(true){
     //copia o vetor original para o vetor de copia
     memcpy(v_copia, v, (size_t)n * sizeof(dado_t));
 
+    //dados da ordenacao atual
     n_compara = 0;
     n_copia = 0;
+
+    //inicia cronometro, ordena vetor e para cronometro
     crono c;
     crono_zera(&c);
-    algo->funcao(n, v_copia); //ordena a copia
+    algo->funcao(n, v_copia);
     double t = crono_parcial(&c);
 
     //se primeira vez ordenado
-    if(num_repeticoes == 0) {menor_t = t; menor_compara = n_compara; menor_copia = n_copia;}
-    //se ordenado pela segunda vez, e se e o tempo de agora eh menor do que o anterior:
-    else if(num_repeticoes == 1){
-      if(t < menor_t) {seg_menor_t = menor_t; menor_t = t; menor_compara = n_compara; menor_copia = n_copia;}   //se sim, inverte os tempos
-      else{seg_menor_t = t;}                                  //se nao, o t dessa repeticao eh o seg menor
+    if(num_repeticoes == 0){
+      menor_t = t; 
+      menor_compara = n_compara; 
+      menor_copia = n_copia;
     }
-    //se ja ter sido registrado duas repeticoes, ve se o tempo de agora eh menor que um dos outros dois anteriores
+    //se ordenado pela segunda vez e t atual menor que t anterior
+    else if(num_repeticoes == 1){
+      if(t < menor_t){
+        seg_menor_t = menor_t; 
+        menor_t = t; 
+        menor_compara = n_compara; 
+        menor_copia = n_copia;
+      }else{
+        seg_menor_t = t;
+      }
+    }
+    //se repeticao passou de 2, confere se t atual eh menor que uma das anteriores e salva
     else{
-      if(t < menor_t) {seg_menor_t= menor_t; menor_t = t; menor_compara = n_compara; menor_copia = n_copia;}    //tempo de agora eh menor q o menor tempo registrado
-      else if(t < seg_menor_t) {seg_menor_t = t;}             //tempo de agora eh menor q o segundo tempo registrado
+      if(t < menor_t){
+        seg_menor_t= menor_t; 
+        menor_t = t; 
+        menor_compara = n_compara; 
+        menor_copia = n_copia;
+      }
+      else if(t < seg_menor_t) seg_menor_t = t;
     }
 
     num_repeticoes++;
 
     //se ja tem duas repeticoes, ve se elas tem uma diferenca de tempo menor que 1%(0.01 * menor tempo) e quebra while se for o caso
-    if(num_repeticoes >= 2 && ((seg_menor_t - menor_t) <= (0.01 * menor_t))) {break;}
+    if(num_repeticoes >= 2 && ((seg_menor_t - menor_t) <= (0.01 * menor_t))) {break};
     //se passar de 5s cancela
     if(num_repeticoes >= 2 && menor_t > 5.0) {break;}
 
